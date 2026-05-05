@@ -1,0 +1,84 @@
+# ── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Xcode ───────────────────────────────────────────────────────────────────
+## User-specific
+*.pbxuser
+*.perspectivev3
+*.perspectivev3~
+*.mode1v3
+*.mode2v3
+*.xcuserstate
+*.xcuserdatad
+*.xcdatamodeld/
+*.xcdatamodel/
+*.moved-aside
+
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM/
+
+## Bundle output
+build/
+*.xcarchive
+*.xcresult
+
+## SPM/Xcodegen
+project.xcworkspace/
+!.xcodeproj/project.pbxproj
+Pods/
+Package.resolved
+
+# ── Swift / iOS ──────────────────────────────────────────────────────────────
+*.swiftpm/
+*.xcodeproj/
+
+## Build intermediates
+Logs/
+ModuleCache/
+Intermediates.noindex/
+
+# ── ML / Model files ─────────────────────────────────────────────────────────
+Detection/WESAD/
+Detection/*.mlmodel
+Detection/*.mlpackage/
+!Detection/PanicGuardRF.mlpackage/
+Detection/training_metrics.json
+Detection/PanicGuardRF.pkl
+
+# ── Kaggle / API tokens ───────────────────────────────────────────────────────
+.kaggle/
+access_token
+*.token
+
+# ── Python / venvs ───────────────────────────────────────────────────────────
+*.venv/
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+.wesad_env/
+
+# ── Secrets / credentials ─────────────────────────────────────────────────────
+*.env
+*.pem
+*.key
+Credentials/
+Secrets/
+
+# ── macOS specific ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Misc ─────────────────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+Thumbs.db
