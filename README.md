@@ -30,13 +30,16 @@ iOS panic attack detection app using HRV-based Random Forest ML, HealthKit integ
 
 ## Prerequisites
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| Xcode | 15.0+ | |
+| Tool | Version | Install |
+|------|---------|---------|
+| Xcode | 15.0+ | Mac App Store |
 | XcodeGen | 2.35+ | `brew install xcodegen` |
-| Ruby | 2.7+ | For XcodeGen templating |
-| Python | 3.10+ | For ML training (optional) |
-| Kaggle account | — | For downloading WESAD dataset |
+| Ruby | 2.7+ | Comes with macOS |
+| Python | 3.10+ | For ML retraining (optional) |
+| Kaggle account | — | [kaggle.com](https://kaggle.com) — for WESAD download |
+| Apple Developer account | — | [developer.apple.com](https://developer.apple.com) — for signing |
+
+> **macOS is required** to run Xcode and build the app.
 
 ---
 
@@ -55,46 +58,74 @@ cd PanicGuard
 xcodegen generate
 ```
 
-This reads `project.yml` and produces `PanicGuard.xcodeproj`.
+This reads `project.yml` and produces `PanicGuard.xcodeproj`. SPM packages (SnapKit, SQLite.swift, MediaPipeTasksGenAI) resolve automatically on first open — no CocoaPods.
 
-### 3. Install CocoaPods dependencies
+### 3. Configure signing
 
-```bash
-cd PanicGuard
-pod install
-```
-
-### 4. Configure signing
-
-1. Open `PanicGuard.xcworkspace` in Xcode
+1. Open `PanicGuard.xcodeproj` in Xcode
 2. Select the `PanicGuard` target → **Signing & Capabilities**
 3. Set your Team and Bundle Identifier
 4. Repeat for the `WatchPanicGuard` target if using the watchOS companion
 
-### 5. Required entitlements
+### 4. Enable capabilities
 
-The following capabilities must be enabled in your Apple Developer account and Xcode project:
+The following must be added to your Apple Developer account and Xcode project:
 
-- **HealthKit** (read: heart rate, HRV, step count, sleep analysis; write: mindful minutes)
-- **Background Modes** → Background processing, Background fetch, Remote notifications
+- **HealthKit** — read: heart rate, HRV, step count, sleep analysis; write: mindful minutes
+- **Background Modes** — Background processing, Background fetch, Remote notifications
 - **Push Notifications**
-- **Location When In Use** (deferred — only requested at escalation trigger)
-- **EventKit** (calendar read access)
+- **Location When In Use** — deferred until escalation trigger (privacy-first)
+- **EventKit** — calendar read access
 
-### 6. Apple Watch (optional)
+### 5. Apple Watch (optional)
 
-Pairing with an Apple Watch significantly improves HRV accuracy. Without one, detection falls back to iPhone motion sensors (reduced precision).
+Pairing an Apple Watch significantly improves HRV accuracy. Without one, detection falls back to iPhone motion sensors (reduced precision).
 
-### 7. ML Model — Retrain with real WESAD data
+---
 
-The bundled `PanicGuardRF.mlpackage` was trained on the WESAD dataset. To retrain on fresh data:
+## Running the App
+
+### Build and run
 
 ```bash
-# Download WESAD from Kaggle
+open PanicGuard.xcodeproj
+# Select a simulator or paired Apple Watch
+# Press ⌘R to build and run
+```
+
+### Demo mode
+
+Enable `DemoService` in `App/PanicGuardApp.swift` to run with simulated sensor data — no Apple Watch or HealthKit access required:
+
+```swift
+// In PanicGuardApp.swift, uncomment:
+@StateObject private var demoService = DemoService()
+```
+
+### Key settings
+
+| Setting | Default | Location |
+|---------|---------|---------|
+| `autoEscalate` | ON | SettingsView |
+| `nudgeEnabled` | ON | SettingsView |
+| `healthKitSync` | ON | SettingsView |
+| `demoMode` | OFF | SettingsView |
+
+---
+
+## ML Model — Retrain with WESAD Data
+
+The bundled `PanicGuardRF.mlpackage` was trained on the WESAD dataset. Retraining requires macOS (for CoreML export).
+
+```bash
+# 1. Install Python dependencies
+pip install numpy pandas scikit-learn==1.5.1 coremltools imbalanced-learn joblib wfdb
+
+# 2. Download WESAD from Kaggle
 mkdir -p Detection/WESAD
 kaggle datasets download -d orvile/wesad-wearable-stress-affect-detection-dataset -p Detection/WESAD --unzip
 
-# Train (macOS required for CoreML export)
+# 3. Run training (macOS only)
 cd Detection
 KAGGLE_TOKEN="your_kaggle_token" python3 train_rf_real.py
 ```
@@ -105,35 +136,20 @@ This regenerates `Detection/PanicGuardRF.mlpackage` and `Detection/training_metr
 
 ---
 
-## Running the App
+## Cloudflare Worker (Escalation)
 
-### Development
+Deploy your own Worker for SMS escalation:
 
 ```bash
-open PanicGuard.xcworkspace
-# Select a simulator or paired Apple Watch in Xcode
-# Press ⌘R to build and run
+cd ../panic-guard-escalation
+wrangler deploy
 ```
 
-### Demo Mode
-
-Enable `DemoService` in `App/PanicGuardApp.swift` to run with simulated sensor data — no Apple Watch or HealthKit access required:
+Set the `WORKER_URL` in `EscalationService.swift`:
 
 ```swift
-// In PanicGuardApp.swift, uncomment:
-@StateObject private var demoService = DemoService()
+private let workerURL = "https://your-worker.your-subdomain.workers.dev/escalate"
 ```
-
-### Configuration
-
-Key settings in `Settings/SettingsView.swift`:
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `autoEscalate` | ON | Automatically send SMS after 5 min if no response |
-| `nudgeEnabled` | ON | Proactive Gemma nudges based on calendar/sleep |
-| `healthKitSync` | ON | Background HealthKit delivery |
-| `demoMode` | OFF | Simulated sensor data for dev/demo |
 
 ---
 
@@ -142,7 +158,7 @@ Key settings in `Settings/SettingsView.swift`:
 ```
 PanicGuard/
 ├── App/
-│   ├── PanicGuardApp.swift       # App entry, Navigation
+│   ├── PanicGuardApp.swift       # App entry, navigation
 │   └── PanicGuardCoordinator.swift
 ├── Detection/
 │   ├── DetectionEngine.swift     # RF inference + state machine
@@ -157,7 +173,7 @@ PanicGuard/
 │   └── CalendarIntegrationService.swift
 ├── Gemma/
 │   ├── GemmaService.swift
-│   ├── GemmaPromptBuilder.swift  # Prompt families A–D
+│   ├── GemmaPromptBuilder.swift   # Prompt families A–D
 │   ├── GemmaJournalCorrelator.swift
 │   ├── GemmaProactiveNudgeScheduler.swift
 │   └── GemmaTherapyReportGenerator.swift
@@ -180,26 +196,9 @@ PanicGuard/
 
 ---
 
-## Cloudflare Worker (Escalation)
-
-Deploy your own Worker for SMS escalation:
-
-```bash
-cd ../panic-guard-escalation
-wrangler deploy
-```
-
-Set the `WORKER_URL` in `EscalationService.swift`:
-
-```swift
-private let workerURL = "https://your-worker.your-subdomain.workers.dev/escalate"
-```
-
----
-
 ## API Reference
 
-### Core ML Input (`RFFeatureVector`)
+### Core ML Input Features
 
 | Feature | Unit | Description |
 |---------|------|-------------|
