@@ -37,7 +37,7 @@ iOS panic attack detection app using HRV-based Random Forest ML, HealthKit integ
 | Ruby | 2.7+ | Comes with macOS |
 | Python | 3.10+ | For ML retraining (optional) |
 | Kaggle account | — | [kaggle.com](https://kaggle.com) — for WESAD download |
-| Apple Developer account | — | [developer.apple.com](https://developer.apple.com) — for signing |
+| Apple Developer account | Paid ($99/yr) | [developer.apple.com](https://developer.apple.com) — required for HealthKit, Background Modes, and Push Notifications |
 
 > **macOS is required** to run Xcode and build the app.
 
@@ -67,9 +67,9 @@ This reads `project.yml` and produces `PanicGuard.xcodeproj`. SPM packages (Snap
 3. Set your Team and Bundle Identifier
 4. Repeat for the `WatchPanicGuard` target if using the watchOS companion
 
-### 4. Enable capabilities
+### 4. Enable capabilities (paid Apple Developer account required)
 
-The following must be added to your Apple Developer account and Xcode project:
+The following must be added to your Apple Developer account and Xcode project. These entitlements are only available with a **paid ($99/yr) membership**:
 
 - **HealthKit** — read: heart rate, HRV, step count, sleep analysis; write: mindful minutes
 - **Background Modes** — Background processing, Background fetch, Remote notifications
