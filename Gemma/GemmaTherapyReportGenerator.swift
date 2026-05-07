@@ -14,7 +14,7 @@ final class GemmaTherapyReportGenerator: ObservableObject {
 
     // MARK: - Dependencies
 
-    private let gemmaService: GemmaService
+    private let gemmaService: GemmaServiceLiteRT
     private let episodeLogger: EpisodeLogger
 
     // MARK: - Date Formatters
@@ -39,7 +39,7 @@ final class GemmaTherapyReportGenerator: ObservableObject {
 
     // MARK: - Initialization
 
-    init(gemmaService: GemmaService = .shared, episodeLogger: EpisodeLogger = EpisodeLogger()) {
+    init(gemmaService: GemmaServiceLiteRT = .shared, episodeLogger: EpisodeLogger = EpisodeLogger()) {
         self.gemmaService = gemmaService
         self.episodeLogger = episodeLogger
         loadHistory()

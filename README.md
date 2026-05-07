@@ -52,24 +52,37 @@ git clone git@github.com:abiyyu2301/PanicGuard.git
 cd PanicGuard
 ```
 
-### 2. Generate the Xcode project
+### 2. Download LiteRT binaries and Gemma model
+
+```bash
+# Download iOS arm64 LiteRT dylibs (~40 MB)
+./scripts/download-litert-dylibs.sh
+
+# Download Gemma 4 2B pre-converted model (~2.5 GB)
+./scripts/download-gemma-model.sh
+```
+
+> **Note:** The Gemma model + dylibs are ~2.5 GB. They are gitignored and downloaded via scripts after clone. The dylibs are arm64 machine code — they only work on a real iOS device or M-series Mac simulator.
+
+### 3. Generate the Xcode project
 
 ```bash
 xcodegen generate
+pod install
 ```
 
-This reads `project.yml` and produces `PanicGuard.xcodeproj`. SPM packages (SnapKit, SQLite.swift, MediaPipeTasksGenAI) resolve automatically on first open — no CocoaPods.
+This reads `project.yml` and produces `PanicGuard.xcodeproj` and `PanicGuard.xcworkspace`. SPM packages (SnapKit, SQLite.swift) resolve automatically on first open.
 
-### 3. Configure signing
+### 4. Configure signing
 
 1. Open `PanicGuard.xcodeproj` in Xcode
 2. Select the `PanicGuard` target → **Signing & Capabilities**
 3. Set your Team and Bundle Identifier
 4. Repeat for the `WatchPanicGuard` target if using the watchOS companion
 
-### 4. Enable capabilities
+### 5. Enable capabilities
 
-> **Free account**: Steps 4–5 below require a **paid Apple Developer account ($99/yr)** only if you want HealthKit background delivery and Push Notifications on a physical device. For development and testing on the simulator, these steps are optional.
+> **Free account**: Steps 5–6 below require a **paid Apple Developer account ($99/yr)** only if you want HealthKit background delivery and Push Notifications on a physical device. For development and testing on the simulator, these steps are optional.
 
 The following capabilities must be added to your Apple Developer account and Xcode project for full functionality:
 
@@ -79,7 +92,7 @@ The following capabilities must be added to your Apple Developer account and Xco
 - **Location When In Use** — deferred until escalation trigger (privacy-first)
 - **EventKit** — calendar read access
 
-### 5. Apple Watch (optional)
+### 6. Apple Watch (optional)
 
 Pairing an Apple Watch significantly improves HRV accuracy. Without one, detection falls back to iPhone motion sensors (reduced precision).
 
@@ -174,11 +187,20 @@ PanicGuard/
 │   ├── EscalationService.swift    # Cloudflare Worker → Twilio
 │   └── CalendarIntegrationService.swift
 ├── Gemma/
-│   ├── GemmaService.swift
-│   ├── GemmaPromptBuilder.swift   # Prompt families A–D
+│   ├── GemmaService.swift          # Original MediaPipe Gemma (deprecated, simulation only)
+│   ├── GemmaServiceLiteRT.swift    # LiteRT C API — Gemma 4 2B on-device inference
+│   ├── LiteRTModel.swift           # Swift-C interop layer for LiteRT engine
+│   ├── GemmaPromptBuilder.swift    # Prompt families A–D
 │   ├── GemmaJournalCorrelator.swift
 │   ├── GemmaProactiveNudgeScheduler.swift
 │   └── GemmaTherapyReportGenerator.swift
+├── c/
+│   └── litert_engine.h             # LiteRT-LM C API header (copied from google-ai-edge/LiteRT-LM)
+├── scripts/
+│   ├── download-litert-dylibs.sh   # Download iOS arm64 dylibs from GitHub
+│   └── download-gemma-model.sh     # Download Gemma 4 2B .litertlm from HuggingFace
+├── prebuilt/
+│   └── ios_arm64/                  # LiteRT dylibs (arm64) — downloaded by script
 ├── Intervention/
 │   ├── InterventionService.swift
 │   ├── BreathingCircleView.swift

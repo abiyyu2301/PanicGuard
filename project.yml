@@ -13,9 +13,6 @@ packages:
   SQLite:
     url: https://github.com/stephencelis/SQLite.swift.git
     from: "0.15.0"
-  MediaPipeTasksGenAI:
-    url: https://github.com/google/ai-edge-bazel-ios
-    from: "0.4.0"
 
 targets:
   PanicGuard:
@@ -28,14 +25,18 @@ targets:
       - path: Services
       - path: Detection
         excludes:
-          - "PanicGuardRF.mlpackage"
-      - path: Detection/PanicGuardRF.mlpackage
+          - "**/*.gguf"
+          - "**/*.litertlm"
       - path: Gemma
       - path: Intervention
-      - path: Escalation
+
       - path: Onboarding
       - path: Settings
       - path: Demo
+      - path: c
+      - path: Detection/Gemma/gemma-4-E2B-it.litertlm
+        type: file
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.panicguard.app
@@ -52,10 +53,20 @@ targets:
         ENABLE_PREVIEWS: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
         ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+        SWIFT_OBJC_BRIDGING_HEADER: "$(SRCROOT)/PanicGuard-Bridging-Header.h"
+        OTHER_LDFLAGS:
+          - "-force_load"
+          - "$(SRCROOT)/prebuilt/ios_arm64/libLiteRt.dylib"
+          - "-force_load"
+          - "$(SRCROOT)/prebuilt/ios_arm64/libLiteRtMetalAccelerator.dylib"
+          - "-force_load"
+          - "$(SRCROOT)/prebuilt/ios_arm64/libLiteRtTopKMetalSampler.dylib"
+          - "-force_load"
+          - "$(SRCROOT)/prebuilt/ios_arm64/libGemmaModelConstraintProvider.dylib"
+          - "-lc++"
     dependencies:
       - package: SnapKit
       - package: SQLite
-      - package: MediaPipeTasksGenAI
     entitlements:
       path: App/PanicGuard.entitlements
       properties:

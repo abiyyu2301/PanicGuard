@@ -298,7 +298,7 @@ final class TriggerCorrelationViewModel: ObservableObject {
     @Published var loadingExplanations: [UUID: Bool] = [:]
 
     private let episodeLogger = EpisodeLogger()
-    private let gemmaService = GemmaService.shared
+    private let gemmaService = GemmaServiceLiteRT.shared
 
     func load() {
         activeCorrelations = (try? episodeLogger.queryActiveTriggerCorrelations()) ?? []

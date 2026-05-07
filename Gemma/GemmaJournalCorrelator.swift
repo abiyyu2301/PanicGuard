@@ -9,7 +9,7 @@ final class GemmaJournalCorrelator: ObservableObject {
 
     // MARK: - Dependencies
 
-    private let gemmaService = GemmaService.shared
+    private let gemmaService = GemmaServiceLiteRT.shared
     private let episodeLogger = EpisodeLogger()
     private let healthKitService = HealthKitService.shared
     private let eventStore = EKEventStore()

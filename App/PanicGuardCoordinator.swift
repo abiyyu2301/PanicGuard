@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 // MARK: - Panic Guard Coordinator
-/// Wires HealthKit → DetectionEngine → GemmaService → InterventionService → EscalationService
+/// Wires HealthKit → DetectionEngine → GemmaServiceLiteRT → InterventionService → EscalationService
 /// into a complete panic detection and intervention pipeline per PRD Sections 4.1-4.4, 6.
 final class PanicGuardCoordinator: ObservableObject {
     static let shared = PanicGuardCoordinator()
@@ -10,7 +10,7 @@ final class PanicGuardCoordinator: ObservableObject {
     // MARK: - Services
     private let healthKitService = HealthKitService.shared
     private let detectionEngine = DetectionEngine.shared
-    private let gemmaService = GemmaService.shared
+    private let gemmaService = GemmaServiceLiteRT.shared
     private let interventionService = InterventionService.shared
     private let escalationService = EscalationService.shared
     private let episodeLogger = EpisodeLogger()
@@ -136,7 +136,7 @@ final class PanicGuardCoordinator: ObservableObject {
     }
 
     // MARK: - Intervention Pipeline
-    /// 4. Coordinator calls GemmaService.makeDecision()
+    /// 4. Coordinator calls GemmaServiceLiteRT.makeDecision()
     /// 5. GemmaService decision → InterventionService.triggerIntervention(type)
     private func triggerInterventionPipeline(confidence: Double) {
         let heartRate = healthKitService.latestHeartRate ?? 0

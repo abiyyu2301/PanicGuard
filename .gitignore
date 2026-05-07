@@ -42,8 +42,10 @@ Logs/
 ModuleCache/
 Intermediates.noindex/
 
-# ── ML / Model files ─────────────────────────────────────────────────────────
-Detection/WESAD/
+# ── LiteRT / Gemma binaries (downloaded post-clone via scripts) ──────────────
+Detection/Gemma/*.litertlm
+Detection/Gemma/*.gguf
+prebuilt/
 Detection/*.mlmodel
 Detection/*.mlpackage/
 !Detection/PanicGuardRF.mlpackage/
