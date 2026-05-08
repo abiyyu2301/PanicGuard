@@ -25,13 +25,16 @@ download_preconverted() {
     # Check for huggingface-cli
     if command -v huggingface-cli &>/dev/null; then
         echo "Downloading Gemma 4 2B .litertlm model from HuggingFace..."
-        huggingface-cli download google/gemma-4-2b-it --local-dir "$DEST_DIR" --include "*.litertlm"
+        huggingface-cli download litert-community/gemma-4-E2B-it-litert-lm \
+            --local-dir "$DEST_DIR" \
+            --include "gemma-4-E2B-it.litertlm"
     else
         echo "huggingface-cli not found."
         echo "Please install it: pip install huggingface-hub"
         echo ""
-        echo "Or manually download the model from:"
-        echo "  https://huggingface.co/liteRT/gemma-4-E2B-it"
+        echo "Or manually download from:"
+        echo "  https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm"
+        echo "  → download gemma-4-E2B-it.litertlm"
         echo ""
         echo "Place the .litertlm file in: Detection/Gemma/"
         return 1
