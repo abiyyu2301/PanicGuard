@@ -22,6 +22,9 @@ Run: KAGGLE_TOKEN=... python3 train_rf_real.py
 
 import os, json, sys, warnings, math
 import numpy as np
+# ⚠️ coremltools overrides np.random on import — set seed BEFORE other imports
+RANDOM_STATE = 42
+np.random.seed(RANDOM_STATE)
 import pandas as pd
 from collections import defaultdict
 
@@ -45,7 +48,6 @@ FEATURE_COLS = ["rmssd", "sdnn", "hr_mean", "hr_std",
                 "lf_hf_ratio", "pnn50",
                 "age_group", "time_of_day", "sleep_hours"]
 
-RANDOM_STATE = 42
 np.random.seed(RANDOM_STATE)
 
 # ── IBI loading ────────────────────────────────────────────────────────────────

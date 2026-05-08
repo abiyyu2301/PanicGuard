@@ -27,6 +27,9 @@ targets:
         excludes:
           - "**/*.gguf"
           - "**/*.litertlm"
+      - path: Detection/PanicGuardRF.mlpackage
+        type: bundle
+        buildPhase: compileCoreML
       - path: Gemma
       - path: Intervention
 

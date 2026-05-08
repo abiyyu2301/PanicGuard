@@ -53,6 +53,7 @@ final class HRVFeatureExtractor {
     private(set) var currentRMSSD: Double = 0.0
     private(set) var currentSDNN: Double = 0.0
     private(set) var currentHRMean: Double = 0.0
+    private(set) var currentPNN50: Double = 0.0  // % of successive RR pairs with diff >50ms
     private(set) var currentHRVQuality: HRVQuality = .insufficientData
     
     enum HRVQuality: String {
@@ -187,6 +188,7 @@ final class HRVFeatureExtractor {
         guard rrCopy.count >= minWindowSamples else {
             currentRMSSD = 0.0
             currentSDNN = 0.0
+            currentPNN50 = 0.0
             currentHRMean = 0.0
             currentHRVQuality = .insufficientData
             return
@@ -200,6 +202,9 @@ final class HRVFeatureExtractor {
         
         // SDNN: standard deviation of NN intervals (ms)
         currentSDNN = computeSDNN(rrIntervals: windowRRs)
+        
+        // pNN50: % of successive RR pairs differing by >50ms
+        currentPNN50 = computePNN50(rrIntervals: windowRRs)
         
         // Mean HR over window
         currentHRMean = windowHRs.reduce(0, +) / Double(windowHRs.count)
@@ -243,7 +248,26 @@ final class HRVFeatureExtractor {
         
         return sqrt(variance) * 1000.0 // convert s → ms
     }
-    
+
+    /// Compute pNN50: percentage of successive RR intervals differing by more than 50ms.
+    /// rrIntervals are in seconds; result is a percentage (0-100).
+    private func computePNN50(rrIntervals: [TimeInterval]) -> Double {
+        guard rrIntervals.count >= 2 else { return 0.0 }
+
+        var nnCount = 0
+        var totalCount = 0
+
+        for i in 1..<rrIntervals.count {
+            let diff = abs(rrIntervals[i] - rrIntervals[i - 1]) // in seconds
+            totalCount += 1
+            if diff > 0.050 {  // 50ms threshold
+                nnCount += 1
+            }
+        }
+
+        return totalCount > 0 ? (Double(nnCount) / Double(totalCount)) * 100.0 : 0.0
+    }
+
     /// Compute RMSSD from a buffer, used internally for ratio calculations.
     private func computeRMSSDFromBuffer(_ timestamps: [Date]) -> Double {
         let relevantRRs = rrBuffer.filter { timestamps.contains($0.timestamp) }.map { $0.rr }
