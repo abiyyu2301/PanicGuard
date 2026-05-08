@@ -165,9 +165,11 @@ final class LiteRTModel {
         )
 
         // Generate content (prefill + decode in one shot)
-        guard let responses = withUnsafePointer(to: &inputData) { inputPtr in
-            litert_lm_session_generate_content(session, inputPtr, 1)
-        } else {
+        let responses: UnsafeMutablePointer<litert_lm_responses_t>?
+        withUnsafeMutablePointer(to: &inputData) { inputPtr in
+            responses = litert_lm_session_generate_content(session, inputPtr, 1)
+        }
+        guard let responses else {
             throw LiteRTError.inferenceFailed("generate_content returned NULL")
         }
         defer { litert_lm_responses_delete(responses) }

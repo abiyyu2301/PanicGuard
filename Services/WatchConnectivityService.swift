@@ -1,6 +1,5 @@
 import Foundation
 import WatchConnectivity
-import WatchKit
 
 /// Haptic pattern types that can be sent to Apple Watch
 enum WatchHapticPattern: String, Codable {

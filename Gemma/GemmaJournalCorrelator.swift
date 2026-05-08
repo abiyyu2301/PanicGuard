@@ -264,7 +264,7 @@ final class GemmaJournalCorrelator: ObservableObject {
         if let openBracket = string.firstIndex(of: "["),
            let closeBracket = string.lastIndex(of: "]") {
             let arrayStr = String(string[openBracket...closeBracket])
-            let pattern = #"\"([^\"]+)\""
+            let pattern = #"([^"]+)"
             if let regex = try? NSRegularExpression(pattern: pattern) {
                 let nsString = arrayStr as NSString
                 let results = regex.matches(in: arrayStr, range: NSRange(location: 0, length: nsString.length))
